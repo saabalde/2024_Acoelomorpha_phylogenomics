@@ -7,7 +7,7 @@ In this study, we have sequenced 29 new transcriptomes, doubling the number of s
 The recovered (molecular) topology is mostly congruent with previous studies. The most important difference is the recovery of Paratomella as the first off-shoot within Acoela, dramatically changing the reconstruction of the ancestral acoel. Besides, we have detected incongruence between the gene trees and the species tree, likely linked to incomplete lineage sorting, and some signal of introgression between the families Dakuidae and Mecynostomidae, which hampers inferring the correct placement of this family and, particularly, of the genus *Notocelis*. Main diversification events within Acoelomorpha coincide with known bilaterian diversification and extinction periods. Although morphological data failed to recover a robust phylogeny, phylogenetic placement has proven to be a suitable alternative when a reference phylogeny is available.
 
 ## Repository description
-This repository is intended to offer enough details to replicate our study, with explanations to the reasoning behind some of our decisions. Ideally, the level of detail should be enough to be accessible for people with a low background in phylogenomics, and so we hope it can also be used as a reference in future, similar studies.
+This repository is intended to offer enough details to replicate our study, explaining the reasoning behind some of our decisions. Ideally, the level of detail should be enough to be accessible for people with a low background in phylogenomics, and so we hope it can also be used as a reference in future, similar studies.
 
 ### Data accessibility:
 <ul>
