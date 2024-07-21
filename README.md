@@ -3,7 +3,7 @@
 Xenacoelomorpha are mostly microscopic, benthic, marine worms. They are morphologically very simple, without many of the structures typical of other bilaterians, such as body cavity, through-gut, or circulatory and excretory systems. The uncertain position of Xenacoelomorpha within the metazoan tree (either as sister to Ambulacraria, Xenambulacraria hypothesis, or Protostomes+Deuterostomes, Nephrozoa hypothesis) has understandably attracted a lot of attention, overshadowing the study of phylogenetic relationships within this group. Given that Xenoturbella includes only six species whose relationships are well understood, we decided to focus on the most speciose Acoelomorpha (Acoela + Nemertodermatida). 
 
 ![image](https://github.com/saabalde/2024_Acoelomorpha_phylogenomics/blob/main/Acoelomorpha_photos.png)
-**A:** Acoela, *Diopisthoporus longitubus*; **B:** Acoela, *Notocelis gullmarensis*; **C:** Nemertodermatida, *Flagellophora_apelti*; **D:** Nemertodermatida, *Nemertoderma westbladi*
+**A:** Acoela, *Diopisthoporus longitubus*; **B:** Acoela, *Notocelis gullmarensis*; **C:** Nemertodermatida, *Flagellophora apelti*; **D:** Nemertodermatida, *Nemertoderma westbladi*
 
 In this study, we have sequenced 29 new transcriptomes, doubling the number of sequenced species, to infer a backbone tree for Acoelomorpha based on genomic data. We have used this new phylogeny to date main cladogenetic events, infer character evolution, and calculate rates of morphological evolution. Finally, we have also used morphological phylogenetics to test to what extent morphological data can be used in phylogenetic inference.
 
