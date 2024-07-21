@@ -7,7 +7,7 @@
 ## The taxon sampling is a mix of new (29) and already published (18) transcriptomes downloaded from the SRA.
 ## The downloaded transcriptomes are:
 
-# DRR151142		Praesagittifera naikaiensis
+# DRR151142	Praesagittifera naikaiensis
 # SRR2500940	Xenoturbella profunda
 # SRR2681155	Meara stichopi
 # SRR2681679	Convolutriloba macropyga
