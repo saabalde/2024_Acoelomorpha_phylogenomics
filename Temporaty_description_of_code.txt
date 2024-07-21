@@ -27,7 +27,7 @@
 # SRR8617822	Neochildia fusca
 # SRR8641368	Flagellophora sp.
 
-## The new transcriptomes were generated in three sequencing batchs. The first batch of new samples was processed at SciLifeLab inmediately 
+## The new transcriptomes were generated in three sequencing batches. The first batch of new samples was processed at SciLifeLab immediately 
 ## after extraction:
 
 # P15761_101	Archaphanostoma occulta     
