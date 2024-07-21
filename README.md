@@ -12,6 +12,8 @@ The recovered (molecular) topology is mostly congruent with previous studies, bu
 ## Repository description
 This repository is intended to offer enough details to replicate our study, explaining the reasoning behind some of our decisions. Ideally, the level of detail should be enough to be accessible for people with a low background in phylogenomics, and so we hope it can also be used as a reference in future, similar studies.
 
+While we format the repository, you can follow the "Temporaty_description_of_code.txt" file.
+
 ### Data accessibility:
 <ul>
     <li><strong>Raw reads:</strong> All transcriptomes can be downloaded from the <a href="https://www.ncbi.nlm.nih.gov/sra/?term=xenacoelomorpha">NCBI SRA</a>. The new transcriptomes are part of the <a href="https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1106782">Bioproject PRJNA1106782</a>.
