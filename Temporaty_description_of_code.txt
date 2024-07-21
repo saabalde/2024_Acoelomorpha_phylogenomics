@@ -1,6 +1,6 @@
-###################################
-## Xenacoelomorpha Phylogenomics ##
-###################################
+################################
+## Acoelomorpha Phylogenomics ##
+################################
 
 ## This is a summary of the pipeline followed to generate the tree of the Xenacoelomorpha, based on transcriptome data.
 
