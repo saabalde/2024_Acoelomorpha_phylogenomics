@@ -30,48 +30,21 @@ Finally, [BUSCO 3](https://busco.ezlab.org/) and the metazoan database were used
 
 In the end, all the samples from the SRA were assembled following the first approach, while all the new transcriptomes were assembled with one of the other two.
 
+## Detection of cross-contamination
+Cross-contamination can occur when samples are processed at the same time in the lab, by the same people, or are sequenced in the same facility. If not corrected, this can lead to incongruent topologies. We used [CroCo](https://gitlab.mbb.univ-montp2.fr/mbb/CroCo) to identify and separate contigs that might be the result of cross-contamination. In brief, CroCo maps the reads from each sample to all assemblies and measures its expression level (in our case, using [Kallisto](https://github.com/pachterlab/kallisto)). If the expression of a contig is higher in an alien sample than its own, this contig is flagged and removed.
+Since our samples were processed in three independent batches (two batches were not extracted or sequenced at the same time), we ran CroCo three times.
 
+    CroCo_v1.1.sh --mode p --in ASSEMBLIES_directory --tool K --output-level 2 --threads 8 2>&1 | tee directory.log
 
+## Annotation of coding regions
+Once we have a clean dataset, we can start preparing the data for the phylogenomic analyses. The first step is to identify coding regions in the transcriptome. We used [TransDecoder](https://github.com/TransDecoder/TransDecoder) to extract from the contigs all coding regions with at least 300 amino acids. We chose this length based on preliminary analyses. We tried several minimum sizes (100, 200, 250, 300, 400, 500, 600, and 700 amino acids), but we considered 300 amino acids the best compromise between the number of extracted CDS and the accuracy of the orthology search. Orthology search based on the smallest coding regions returned a lot of orthogroups that did not look good and generally increased the number of gene copies per orthogroup, hampering paralogy pruning.
 
+    TransDecoder.LongOrfs -t ASSEMBLY -m 300
+    TransDecoder.Predict -t ASSEMBLY
 
+Finally, we used Dedupe (integrated in [BBMap](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbmap-guide/)) to find duplicate coding regions and overlapping fragments.
 
-
-
-
-
-
-
-
-
-
-
-
-## After any sequencing project, the contamination of samples sequenced in the same lane is a very real posibility. To address this 
-## issue, we ran CroCo, which uses Blast searches and mapping of reads to detect transcripts that represent potential instances of 
-## contamination:
-
-/home/saabalde/bin/CroCo/src/CroCo_v1.1.sh --mode p --in ASSEMBLIES_directory --tool K --output-level 2 --threads 8 2>&1 | tee directory.log
-
-## Once we have a clean dataset, we can start preparing the data for the phylogenomic analyses. The first step is to identify coding 
-## regions in the transcriptome using TransDecoder. In general, the longer the protein the more reliable the inference shuld be. However, 
-## if we set a sequence length too long that might imply the recovery of less orthogroups. Since we have data with poor completeness values,
-## we need to find the balance between these two parameters. Hence, we identify the coding regions with minimum lengths of 100, 200, 250, 
-## 300, 500, 600 and 750 amino acids and see what happens.
-
-TransDecoder.LongOrfs -t ASSEMBLY -m 100 / 200 / 250 / 300 / 500 / 600 / 750
-TransDecoder.Predict -t ASSEMBLY
-
-## Only the search of coding regions of 100, 200, 250, 300, and 500 amino acids returned peptides for all the transcriptomes. The sample 
-## Neochildia fusca (SRR8617822) failed to return  any protein when the minimum protein size is 700 aa. The sample Solenofilomorpha sp-9 
-## (P15761_189) failed at 600 and 700 aa.
-
-## After several attempts cleaning these datasets, counting the number of orthogroups, and inspecting some of the alignments, I decide to 
-## continue with a minimum protein size of 300 amino acids because I think it offers the best balance between number of orthogroups and protein 
-## size.
-
-## I have seen in the tests that there are duplicated sequences and, I assume, a lot of fragmentation. The program Dedupe, contained in 
-## BBMAP, finds duplicates and overlapping fragments
-
-for i in *fasta; do dedupe.sh in=$i out=$i.dedupe.fasta findoverlap=t cluster=t minidentity=95 minoverlap=40 amino=t; done
-
-## Run OrthoFinder over this set of proteins
+    for i in *fasta
+        do
+        dedupe.sh in=$i out=$i.dedupe.fasta findoverlap=t cluster=t minidentity=95 minoverlap=40 amino=t
+    done
