@@ -33,6 +33,19 @@ In the end, all the samples from the SRA were assembled following the first appr
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## After any sequencing project, the contamination of samples sequenced in the same lane is a very real posibility. To address this 
 ## issue, we ran CroCo, which uses Blast searches and mapping of reads to detect transcripts that represent potential instances of 
 ## contamination:
