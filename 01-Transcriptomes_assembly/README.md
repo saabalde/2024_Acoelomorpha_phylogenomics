@@ -14,7 +14,7 @@ Third, raw reads were carefully trimmed and quality-trimmed before their assembl
     perl ~/bin/rcorrector/run_rcorrector.pl -1 READ_1 -2 READ_2 -k 21 -od $outfolder -t 8
     
     java -jar $TRIMMOMATIC_HOME/trimmomatic.jar PE READ_1 READ_2 -baseout $output_name \
-          ILLUMINACLIP:/sw/bioinfo/trinity/2.9.1/rackham/trinity-plugins/Trimmomatic/adapters/TruSeq3-PE.fa:2:30:10 \
+          ILLUMINACLIP:$TRIMMOMATIC_HOME/adapters/TruSeq3-PE.fa:2:30:10 \
           SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:35
 
     prinseq-lite -fastq READ_1 -fastq2 READ_2 -out_good 19-228_cor_P_good -out_bad 19-228_cor_P_bad -min_qual_mean 20 -ns_max_p 25 \
