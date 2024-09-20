@@ -102,5 +102,83 @@ If you are not familiar with PhyloPyPruner you should check its very well-docume
     <li>--min-taxa: discard output alignments with fewer than X OTUs. In orthogroups with only four taxa is very easy to have only three unique sequences, which precludes gene tree inference with bootstrap support. Hence, I will select orthogroups containing at least five species.</li>
 </ul>
 
-After pruning all paralogs, the number of orthogroups went down to 6,033. The different stats concerning sequences per alignment have also been affected, but that makes sense because now the maximum number of sequences per alignment is set to 48 (the number of species). The percentage of missing data hasgone up from 82.60% to 84.90%. Finally, 2781 branches have been removed after being deemed too long, just 1.38% of the total.
+After pruning all paralogs, the number of orthogroups went down to 6,033. The different stats concerning sequences per alignment have also been affected, but that makes sense because now the maximum number of sequences per alignment is set to 48 (the number of species). The percentage of missing data has gone up from 82.60% to 84.90%. Finally, 2781 branches have been removed after being deemed too long, just 1.38% of the total.
 
+## Prepare the data for phylogenomic analysis
+We first did some housekeeping in our set of genes. They were: (1) converted to non-aligned fasta files (removing the gaps), (2) stop codons were removed, (3) the headers were cleaned, to leave only the species name, and (4) we corrected the species names that changed during the course of the study.
+
+    mkdir 05-PhyloPyPruner_output-Clean_genes
+    for i in 04-PhyloPyPruner_output/phylopypruner_output/output_alignments/*fa
+        do
+	sed -E '/>/ s/\.OF\@.+//g' $i > ${i}.rename; mv ${i}.rename $i
+        sed -i '/>/! s/\-//g' $i
+        sed -i 's/\*//g' $i
+	
+	sed -i 's/19_228.Sterreria_psammicola/19_228.Sterreria_sp/g' $i
+        sed -i 's/20_053.Archaphanostoma_agile/20_053.Baltalimania_agile/g' $i
+        sed -i 's/P15761_101.Archaphanostoma_occulta/P15761_101.Baltalimania_occulta/g' $i
+        sed -i 's/P15761_102.Isodiametra_sp18/P15761_102.Praeconvoluta_tigrina/g' $i
+        sed -i 's/P15761_125.Haplopostia_rubropunctata/P15761_125.Thalassoanaperus_rubellus/g' $i
+        sed -i 's/P15761_133.Mecynostomum_sp14/P15761_133.Praeaphanostoma_sp/g' $i
+        sed -i 's/P15761_173.Sterreria_sp1/P15761_173.Sterreria_rubra/g' $i
+        sed -i 's/P15761_181.Sterreria_sp2/P15761_181.Sterreria_lundini/g' $i
+        sed -i 's/SRR6374833.Isodiametra_pulchra/SRR6374833.Aphanostoma_pulchra/g' $i
+        sed -i 's/SRR8524599.Pseudaphanostoma_variabilis/SRR8524599.Baltalimania_agile/g' $i
+	
+	mv -- "$i" "${i%.fa}.fasta"
+     done
+
+Thus far, this dataset contains species with more than one specimen. We need to remove the duplicated individuals, leaving only one tip per species. We removed the specimen with the fewest number of orthologs:
+    <li>20_038.Philactinoposthia_rhammifera</li>
+    <li>20_053.Baltalimania_agile</li>
+    <li>P15761_149.Solenofilomorpha_sp2</li>
+    <li>P15761_165.Kuma_sp5</li>
+    <li>P15761_189.Solenofilomorpha_sp9</li>
+    <li>SRR8506641.Symsagittifera_roscoffensis</li>
+
+    mkdir 06-No_duplicates
+    cp 05-PhyloPyPruner_output-Clean_genes/ 06-No_duplicates/
+
+    for i in 06-No_duplicates/*fasta
+        do
+	tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep -v '20_038|20_053|P15761_149|P15761_165|P15761_189|SRR8506641' | tr ' ' '\n' > ${i}.tmp
+	mv ${i}.tmp ${i}
+    done
+
+    # Remove alignments with fewer than five sequences
+    for i in 06-No_duplicates/*fasta
+        do
+	sequences=$( grep -c '>' $i )
+	if [ $sequences -lt 5 ]; then
+	    rm $i
+	fi
+    done
+
+XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Later on, I will prepare to parallel datasets: with and without the species Notocelis gullmarensis. This species has proven to be a 
+## problematic branch in the tree. Previous phylogentic attempts (not shown) have recovered Notocelis in different positions of the tree, 
+## lowering the support of the nodes where it was positioned.
