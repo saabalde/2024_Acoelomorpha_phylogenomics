@@ -179,6 +179,4 @@ XXX
 
 
 
-## Later on, I will prepare to parallel datasets: with and without the species Notocelis gullmarensis. This species has proven to be a 
-## problematic branch in the tree. Previous phylogentic attempts (not shown) have recovered Notocelis in different positions of the tree, 
-## lowering the support of the nodes where it was positioned.
+## Later on, I will prepare to parallel datasets: with and without the species Notocelis gullmarensis. This species has proven to be a problematic branch in the tree. Previous phylogentic attempts (not shown) have recovered Notocelis in different positions of the tree, lowering the support of the nodes where it was positioned.
