@@ -203,50 +203,85 @@ Now, we can compare the original and the edited files to remove all sequences th
     # Copy the corresponding Prequal files into this directory
     while IFS='' read -r LINE || [ -n "${LINE}" ]
         do
-        cp ../../04-NoDuplicates/${LINE} ./${LINE}.filtered
+        cp ../07-Prequal//${LINE} ./${LINE}.filtered
     done < ./fasta_files.txt
 
-
-ls *fasta | sed 's/.filtered.fasta//g' > fasta_files.txt
-
-while IFS='' read -r LINE || [ -n "${LINE}" ]
-    do
-    cp ../../04-NoDuplicates/${LINE} ./${LINE}.filtered
-done < ./fasta_files.txt 
-
-for i in $( ls *filtered | sed 's/.filtered//g' )
-    do
-    grep '>' ${i}.filtered.fasta | sort > header_fasta; grep '>' ${i}.filtered | sort > header_filtered
-    fgrep -x -f header_fasta  header_filtered > Similarities.txt
-    sed -i 's/>//g' Similarities.txt
-    
-	while read sequence_id
+    # From each file without the short, unmasked sequences, grab the sequence names and find the in the original files. Copy these into a new, clean, masked file
+    for i in $( ls *filtered | sed 's/.filtered//g' )
         do
-        bioawk -v var="${sequence_id}" -c fastx '$name ~ var {print ">"$name"\n"$seq}' $i.filtered >> $i.filtered.rename
-    done < ./Similarities.txt
-	
-done
-rm *fasta *filtered *txt
+        grep '>' ${i}.filtered.fasta | sort > header_fasta; grep '>' ${i}.filtered | sort > header_filtered
+        fgrep -x -f header_fasta  header_filtered > Similarities.txt
+        sed -i 's/>//g' Similarities.txt
 
-for i in *rename
-    do
-	mv -- "$i" "${i%.fasta.filtered.rename}.fasta.filtered"
-done
+        while read sequence_id
+	    do
+            bioawk -v var="${sequence_id}" -c fastx '$name ~ var {print ">"$name"\n"$seq}' $i.filtered >> $i.filtered.rename
+        done < ./Similarities.txt
+    done
+
+    # Remove the intermediate files and rename the final ones
+    rm *fasta *filtered *txt
+
+    for i in *rename
+        do
+        mv -- "$i" "${i%.fasta.filtered.rename}.fasta.filtered"
+    done
+
+With all the files cleaned, it is time to align the sequences. We used [MAFFT](https://github.com/GSLBiotech/mafft) with the L-INS-i algorithm. L-INS-i can align a set of sequences containing sequences flanking around one alignable domain. Although it is more computationally expensive, it produces a more accurate alignment.
+
+    mkdir 09-MAFFT
+    cp 08-Prequal_filter_masked/*filtered 09-MAFFT
+
+    for f in 09-MAFFT/*filtered
+        do
+        mafft-linsi $f > $f.mafft
+    done
+    rm *filtered
+
+We used [BMGE](https://gitlab.pasteur.fr/GIPhy/BMGE) to clean these alignments. Ambiguously aligned positions were removed with default parameters. Additionally, we removed all sequences with more than 66% gaps and columns with more than 80% gaps (-g 0.66:0.79).
+
+    mkdir 10-BMGE
+    cp 09-MAFFT/*mafft 10-BMGE
+
+    for i in 10-BMGE/*mafft
+        do
+        java -jar /home/saabalde/Escritorio/software/BMGE-1.12/BMGE.jar -i $i -t AA -g 0.66:0.79 -of $i.fas > $i.log
+    done
+    rm *mafft
+
+Since BMGE has removed some sequences from these alignments, we need to check again that all files have at least five species.
+
+    mkdir 11-BMGE_5species
+    cp 10-BMGE/*fas 11-BMGE_5species/
+
+    for i in 11-BMGE_5species/*fas
+        do
+        sequences=$( grep -c '>' $i )
+        if [ $sequences -lt 5 ]; then
+            rm $i
+        fi
+    done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## This step has removed 1748 orthogroups, from 5569 to 3821, more than a 30% of the fasta files. We can perform the alignments now, but for
 ## that we need to prepare two datasets: one with and one without Notocelis. The dataset with Notocelis will only include those orthogroups
 ## where that species is present.
-
-
-
-
-
-
-
-
-
-
-
 
 
 
