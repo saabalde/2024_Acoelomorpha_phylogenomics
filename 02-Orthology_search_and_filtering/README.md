@@ -26,7 +26,7 @@ Now, we format the files for PhyloPyPruner.
     # Genetrees
     for i in 02-Orthofinder_Genetrees/*tree.txt
         do
-	sed -i 's/19_228\_/19_228\./g' $i
+        sed -i 's/19_228\_/19_228\./g' $i
         sed -i 's/19_375\_/19_375\./g' $i
         sed -i 's/19_380\_/19_380\./g' $i
         sed -i 's/20_005\_/20_005\./g' $i
@@ -77,7 +77,7 @@ Now, we format the files for PhyloPyPruner.
 
         sed -i 's/\_OF\_/\.OF\@/g' $i
 	
-	mv -- "$i" "${i%_tree.txt}.tre"
+        mv -- "$i" "${i%_tree.txt}.tre"
     done
 
 Now we should be ready to run PhyloPyPruner, but if there is any error in the files format if will let you know
@@ -110,11 +110,11 @@ We first did some housekeeping in our set of genes. They were: (1) converted to 
     mkdir 05-PhyloPyPruner_output-Clean_genes
     for i in 04-PhyloPyPruner_output/phylopypruner_output/output_alignments/*fa
         do
-	sed -E '/>/ s/\.OF\@.+//g' $i > ${i}.rename; mv ${i}.rename $i
+        sed -E '/>/ s/\.OF\@.+//g' $i > ${i}.rename; mv ${i}.rename $i
         sed -i '/>/! s/\-//g' $i
         sed -i 's/\*//g' $i
 	
-	sed -i 's/19_228.Sterreria_psammicola/19_228.Sterreria_sp/g' $i
+        sed -i 's/19_228.Sterreria_psammicola/19_228.Sterreria_sp/g' $i
         sed -i 's/20_053.Archaphanostoma_agile/20_053.Baltalimania_agile/g' $i
         sed -i 's/P15761_101.Archaphanostoma_occulta/P15761_101.Baltalimania_occulta/g' $i
         sed -i 's/P15761_102.Isodiametra_sp18/P15761_102.Praeconvoluta_tigrina/g' $i
@@ -125,7 +125,7 @@ We first did some housekeeping in our set of genes. They were: (1) converted to 
         sed -i 's/SRR6374833.Isodiametra_pulchra/SRR6374833.Aphanostoma_pulchra/g' $i
         sed -i 's/SRR8524599.Pseudaphanostoma_variabilis/SRR8524599.Baltalimania_agile/g' $i
 	
-	mv -- "$i" "${i%.fa}.fasta"
+        mv -- "$i" "${i%.fa}.fasta"
      done
 
 Thus far, this dataset contains species with more than one specimen. We need to remove the duplicated individuals, leaving only one tip per species. We removed the specimen with the fewest number of orthologs:
@@ -141,21 +141,101 @@ Thus far, this dataset contains species with more than one specimen. We need to 
 
     for i in 06-No_duplicates/*fasta
         do
-	tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep -v '20_038|20_053|P15761_149|P15761_165|P15761_189|SRR8506641' | tr ' ' '\n' > ${i}.tmp
-	mv ${i}.tmp ${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep -v '20_038|20_053|P15761_149|P15761_165|P15761_189|SRR8506641' | tr ' ' '\n' > ${i}.tmp
+        mv ${i}.tmp ${i}
     done
 
     # Remove alignments with fewer than five sequences
     for i in 06-No_duplicates/*fasta
         do
-	sequences=$( grep -c '>' $i )
-	if [ $sequences -lt 5 ]; then
-	    rm $i
-	fi
+        sequences=$( grep -c '>' $i )
+        if [ $sequences -lt 5 ]; then
+            rm $i
+        fi
     done
 
-XXX
+One problem of working with transcriptomes is that sometimes it is difficult to resolve the correct assembly, returning artefactual contigs like chimaeras (i.e. contigs that result from merging two genes into one). This can result in problems during orthology inferences or errors in the alignments. To avoid that, we ran [PREQUAL](https://github.com/simonwhelan/prequal), which pairwise compares the sequences of each fasta file to find regions that do not seem to be homologous to the other sequences. These stretches are removed or masked.
 
+    mkdir 07-Prequal
+    cp 06-No_duplicates/*fasta 07-Prequal/
+
+    for i in *fasta
+        do
+        prequal $i > $i.log
+        rm $i
+    done
+
+PREQUAL has removed a lot of sequences that were generally bad, as well as masked regions within other sequences that were kept. However, some of these masked regions are larger than we would liked, so we decided to remove all sequences that do not have, at least, 250 unmasked amino acids.
+
+    mkdir 08-Prequal_filter_masked
+    cp 07-Prequal/*filtered 08-Prequal_filter_masked
+
+    cd 08-Prequal_filter_masked/
+
+    # Remove masked regions
+    for i in *filtered
+        do
+        sed -i '/>/! s/X//g' $i
+    done
+
+To remove sequences shorter than 250 amino acids, we used the "removesmalls.pl" perl script shared in this [Biostars post](https://www.biostars.org/p/79202/).
+
+    for i in *filtered
+        do
+        perl ./removesmalls.pl 250 $i > $i.fasta
+        rm $i
+    done
+
+    # Remove fasta files with fewer than five sequences
+    for i in *fasta
+        do
+        seqs=$( grep -c '>' $i)
+        if [ $seqs -lt 5 ]; then
+            rm $i
+        fi
+    done
+
+Now, we can compare the original and the edited files to remove all sequences that do not have at least 250 unmasked amino acids:
+
+    # Create a list of the remaining fasta files
+    ls *fasta | sed 's/.filtered.fasta//g' > fasta_files.txt
+
+    # Copy the corresponding Prequal files into this directory
+    while IFS='' read -r LINE || [ -n "${LINE}" ]
+        do
+        cp ../../04-NoDuplicates/${LINE} ./${LINE}.filtered
+    done < ./fasta_files.txt
+
+
+ls *fasta | sed 's/.filtered.fasta//g' > fasta_files.txt
+
+while IFS='' read -r LINE || [ -n "${LINE}" ]
+    do
+    cp ../../04-NoDuplicates/${LINE} ./${LINE}.filtered
+done < ./fasta_files.txt 
+
+for i in $( ls *filtered | sed 's/.filtered//g' )
+    do
+    grep '>' ${i}.filtered.fasta | sort > header_fasta; grep '>' ${i}.filtered | sort > header_filtered
+    fgrep -x -f header_fasta  header_filtered > Similarities.txt
+    sed -i 's/>//g' Similarities.txt
+    
+	while read sequence_id
+        do
+        bioawk -v var="${sequence_id}" -c fastx '$name ~ var {print ">"$name"\n"$seq}' $i.filtered >> $i.filtered.rename
+    done < ./Similarities.txt
+	
+done
+rm *fasta *filtered *txt
+
+for i in *rename
+    do
+	mv -- "$i" "${i%.fasta.filtered.rename}.fasta.filtered"
+done
+
+## This step has removed 1748 orthogroups, from 5569 to 3821, more than a 30% of the fasta files. We can perform the alignments now, but for
+## that we need to prepare two datasets: one with and one without Notocelis. The dataset with Notocelis will only include those orthogroups
+## where that species is present.
 
 
 
