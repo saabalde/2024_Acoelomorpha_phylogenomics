@@ -50,3 +50,5 @@ Finally, we used Dedupe (integrated in [BBMap](https://jgi.doe.gov/data-and-tool
     done
 
 The resulting assemblies have been uploaded to the <a href="https://datadryad.org/stash/share/-j295xDx5ENV04DAmF_IDdEvbUuE24jbi6t_Ug9FmNs">Dryad repository</a>.
+
+---
