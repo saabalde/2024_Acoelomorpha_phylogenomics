@@ -66,10 +66,18 @@ Finally, we also ran [PhyloBayes](https://github.com/bayesiancook/phylobayes) ov
     bpcomp -x 1000 10 Acoelomorpha_300genes_chain3 Acoelomorpha_300genes_chain4
     tracecomp -x 1000 Acoelomorpha_300genes_chain3 Acoelomorpha_300genes_chain4
 
-aa
+## Main phylogenomic results
+These analyses returned two main results. On one hand, all but the occupancy subsampled matrices failed to confidently resolve inter-family relationships (**Fig. 1**). A quick comparison of these matrices revealed that they all are less informative and have an overall lower bootstrap support than the occupancy ones (**Fig. 2a**). Interestingly, following one of the reviewer's suggestions we also discovered that this result is partly due to a LBA artifact. Removing the Nemertodermatida species from the matrix results in a better acoel tree, although still not fully resolved (**inset of Fig. 1**).
+
+![image](https://github.com/saabalde/2024_Acoelomorpha_phylogenomics/blob/main/Acoelomorpha_photos.png)
+**Fig. 1:** Phylogenomic tree showcasing the difficulty of inferring a robust tree from genes filtered by substitution rate. The tree was inferred from the 567 genes with lowest substitution rate, using site-specific models with 20 amino acid categories (C20) in IQ-TREE and using Xenoturbella as the outgroup. Unless otherwise specified, all nodes have good support (bootstrap / SH-like approximate likelihood ratio test). The scale bar indicates substitutions per site. The inset to the left shows a tree inferred from the same matrix but after removing all Nemertodermatida species and using a typical partition model.
+
+On the other hand, the occupancy matrices were capable of confidently resolving inter-family relationships with good support (**Figure 2**). However, IQ-TREE diferred from PhyloBayes and ASTRAL in some nodes.
+
+![image](https://github.com/saabalde/2024_Acoelomorpha_phylogenomics/blob/main/Acoelomorpha_photos.png)
+**Fig. 1:** Summary of the phylogenomic analyses. (a) Proportion of variable sites and average bootstrap support in the supermatrices filtered by occupancy, substitution rate, saturation, compositional heterogeneity, and patristic distances. (b) Gene overlap among the same matrices, displayed as a PCA. The presence and absence of genes on each matrix were used to calculate the two main principal components. Phylogenomic trees inferred from the 300 most complete genes using IQ-TREE and 60 amino acid categories (c) or PhyloBayes (d). Unless otherwise specified, all nodes have maximum support (c: ultrafast bootstrap / SH-like approximate likelihood ratio test; d: posterior probabilities). Species names in grey indicate samples downloaded from the SRA, in black new transcriptomes, and names underlined highlight conflicts between the two topologies. The scale bars indicate substitutions per site.
 
 
-    
 
 
 
