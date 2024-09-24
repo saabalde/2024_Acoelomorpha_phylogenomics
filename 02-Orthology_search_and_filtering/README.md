@@ -401,6 +401,9 @@ Re-align these sequences
 This is our **full dataset without _Notocelis_**.
 
 ## Filtering the data to ameliorate the effect of systematic bias
-AAA
+The full dataset without _Notocelis_ includes 2764 genes, which are too many for some of the analyses. Thus far, the raw data might suffer from different sources of systematic error, such as saturation or compositional heterogeneity. 
+To subsample our orthogroups for those more phylogenetically reliable, we used [genesortR](https://github.com/mongiardino/genesortR), which tries to accommodate several sources of systematic bias. From the GitHub page: "[genesortR] estimates seven gene properties commonly used to characterize the information content of loci in phylogenomic datasets: four sources of systematic bias (average pairwise patristic distance, compositional heterogeneity, level of saturation, and root-to-tip variance), two proxies for phylogenetic signal (Robinson-Foulds similarity to a target topology and average bootstrap support), as well as the proportion of variable sites. (...) a principal component analysis (PCA) is used to find an axis of phylogenetic usefulness along which proxies for signal increase while sources of bias decrease."
+
+Unfortunately, 
 
 
