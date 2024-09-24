@@ -172,6 +172,8 @@ Unfortunately, neither the phylogenetic analyses nor the topology tests were con
 cc
 
 ## Inferring divergence times
-dd
+We used MCMCtree, included in the program [PAML](http://abacus.gene.ucl.ac.uk/software/paml.html), to infer the divergence times among Acoelomorpha lineages. However, before going into details it is important to explain to decisions that might affect the final result. First, we chose the phylogeny inferred by IQ-TREE, with _Notocelis_ as sister to Dakuidae, as our working hypothesis. Despite some topological problems still remaining, this is the best-supported topology and it generally agrees with the literature. Second, due to the absence of fossils from this group, we relied on secondary calibrations to date our tree.
+
+
 
 ---
