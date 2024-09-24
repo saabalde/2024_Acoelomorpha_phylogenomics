@@ -80,7 +80,102 @@ On the other hand, the occupancy matrices were capable of confidently resolving 
 From these two topologies, we chose the ML one as our working hypothesis as we think it is more robust. PhyloBayes reached convergence in the treespace but not in the continuous parameters of the model, while ASTRAL returned some nodes with very low support and near-zero branch lengths.
 
 ## Placing _Notocelis gullmarensis_ in the tree
-bb
+Inferring the position of _Notocelis_ in the tree is more challenging. This species has a very long branch, leading to errors during tree inference. This analysis is based of the **full dataset**. From this, we created a second dataset composed only of phylogenetically informative genes. We selected these genes based on Likelihood Mapping. The Likelihood Mapping measures the amount of phylogenetic informativeness of a gene or a matrix. (Remember to separate the supermatrix into individual genes.)
+
+    # The four clusters are defined in the file: LikelihoodMapping.Clusters.nex
+
+    # Calculate the informativeness of each gene
+    for gene in *fas
+        do
+        iqtree -s ${gene} -m MFP -nt AUTO -lmap ALL -lmclust LikelihoodMapping.Clusters.nex -n 0 -wql
+        rm ${gene}
+    done
+
+We kept all genes that accumulate at least 70% of the quartets in one of the corners, regardless of the topology they support. Besides, from these genes, we removed all species that branch out earlier than Proporidae / Isodiametridae. Finally, we also excluded the genes where at least one of the target families was not present.
+
+    # Remove the species from unrelated families
+    for i in *fas
+        do
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep -v '19_228|19_375|19_380|20_038|20_053|20_082|P15761_149|P15761_157|P15761_165|P15761_173|P15761_181|P15761_189|SRR2500940|SRR2681155|SRR2682004|SRR2682099|SRR2682154|SRR3105703|SRR3105704|SRR5760179|SRR6375633|SRR8454219|SRR8641368' | tr ' ' '\n' > ${i}.tmp
+        mv ${i}.tmp ${i}
+    done
+    
+    # Remove the genes where not all families are present
+    for i in *fas
+        do
+        Convolutidae=$( egrep -c 'DRR151142|P15761_125|P15761_141|SRR2681679|SRR8506641|SRR8617822' $i )
+        Mecynostomidae=$( egrep -c '20_005|20_115|P15761_110|SRR3105702' $i )
+        Dakuidae=$( egrep -c 'P15761_117|20_132' $i )
+        Notocelis=$( grep -c '20_023' $i )
+        Outgroup=$( egrep -c '20_026|20_063|20_073|20_093|P15761_101|P15761_102|P15761_133|SRR6374833|SRR8524599' $i )
+
+        if [ $Convolutidae -lt 1 ] || [ $Mecynostomidae -lt 1 ] || [ $Dakuidae -lt 1 ] || [ $Notocelis -lt 1 ] || [ $Outgroup -lt 1 ]; then
+            rm $i
+        fi
+    done
+
+    # Rename these sequences
+    for i in *fas
+        do
+        sed -i '/>/! s/\-//g' $i
+        mv -- "$i" "${i%.fasta.filtered.mafft.fas}.fasta"
+    done
+    
+    # Realign them
+    for f in *fasta
+        do
+        mafft-linsi $f > $f.mafft
+    done
+    rm *fasta
+
+    # Clean the alignments
+    for i in *mafft
+        do
+        java -jar BMGE.jar -i $i -t AA -g 0.66:0.79 -of $i.fas > $i.log
+    done
+    rm *mafft
+    
+    # Concatenate the resulting genes into a supermatrix
+    perl FASconCAT-G_v1.05.pl -l -s > FASconCat.log
+
+Now we have two supermatrices: the full dataset and the phylogenetically informative genes. Run an AU-test to see the support of each topology.
+
+    # For the full dataset
+    iqtree -s FullDataset_Supermatrix.fas -spp FullDataset_Partitions.txt -m MFP -nt AUTO -z Alternative_topologies.FullDataset.tres -n 0 -zb 10000 -zw -au -wsl -wpl -safe
+
+    # For the phylogenetically informative genes
+    iqtree -s Phylogenetically_informative_genes.fas -spp Phylogenetically_informative_genes_Partitions.txt -m MFP -nt AUTO -z Alternative_topologies.PhylogeneticallyInformative.tres -n 0 -zb 10000 -zw -au -wsl -wpl
+
+With the phylogenetically informative matrix, we also tried MAST. [MAST](http://iqtree.org/doc/Complex-Models#multitree-models) is a new algorithm to test the support of different topologies. It is site based and it allows unlinking different model parameters across sites and topologies. It is more robust than traditional topology tests. Since there are six possible models, we used them all.
+
+    # Each tree has its own GTR model, DNA frequencies and gamma model
+    iqtree2 -s Phylogenetically_informative_genes.fas -m "TMIX{LG+FO+G,LG+FO+G,LG+FO+G,LG+FO+G}+TR" -te Alternative_topologies.PhylogeneticallyInformative.tres -nt AUTO
+    
+    # Link the gamma model
+    iqtree2 -s Phylogenetically_informative_genes.fas -m "TMIX{LG+FO,LG+FO,LG+FO,LG+FO}+G+TR" -te Alternative_topologies.PhylogeneticallyInformative.tres -nt AUTO
+    
+    # Link substitution frequencies
+    iqtree2 -s Phylogenetically_informative_genes.fas -m "TMIX{LG+F+G,LG+F+G,LG+F+G,LG+F+G}+TR" -te Alternative_topologies.PhylogeneticallyInformative.tres -nt AUTO
+    
+    # Unlink the GTR model
+    iqtree2 -s Phylogenetically_informative_genes.fas -m "TMIX{LG+F,LG+F,LG+F,LG+F}+G+TR" -te Alternative_topologies.PhylogeneticallyInformative.tres -nt AUTO
+    
+    # Unlink the gamma model
+    iqtree2 -s Phylogenetically_informative_genes.fas -m "LG+FO+TMIX{G,G,G,G}+TR" -te Alternative_topologies.PhylogeneticallyInformative.tres -nt AUTO
+    
+    # All trees share the same GTR model, DNA frequencies and gamma model
+    iqtree2 -s Phylogenetically_informative_genes.fas -m "LG+FO+G+TR" -te Alternative_topologies.PhylogeneticallyInformative.tres -nt AUTO
+
+ff
+
+
+    
+
+The first thing we did was to use the same analyses described above to see where traditional phylogenetic analyses would place _Notocelis_. Then, we tried two topology tests to see if one topology has more support than the others. We originally tried all possible topologies, with _Notocelis_ shooting off from all internal branches of the phylogeny, but only four were supported: sister to Convolutidae, Mecynostomidae, both, or Dakuidae.
+
+
+
+
 
 ## Inferring the causes of topological discordance
 cc
