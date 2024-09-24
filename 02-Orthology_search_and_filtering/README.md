@@ -309,8 +309,8 @@ To clean this sample, we ran a [Clan test](https://github.com/ChrisCreevey/clan_
 
 Clan_check generates a table where each gene tree is a row and each pre-defined clade a column. For each gene tree and clade, Clan_check will add: "1", if the group is monophyletic, "2" if it is not, and "?" if the target taxa are not present in the tree. With this information, we created a list with all gene trees that returned a "1" (_Faerlea_ + Proporidae do form a clade) called "contaminated_genes.txt" and removed _Faerlea_ from them. Then, the orthogroup was checked to ensure at least five species were present.
 
-    mkdir 15-Final_dataset
-    cp 14-Clan_test/*fas 15-Final_dataset/
+    mkdir 15-Full_dataset
+    cp 14-Clan_test/*fas 15-Full_dataset/
 
     # Remove _Faerlea_
     while IFS='' read -r LINE || [ -n "${LINE}" ]
@@ -336,7 +336,7 @@ Since we have removed one sequence, we decided to realign these files.
         mv -- "$i" "${i%.fasta.filtered.mafft.fas}.fasta.filtered"
     done
 
-    # Re-align the fastas
+    # Re-align the fasta files
     for i in *filtered
         do
         mafft-linsi $f > $f.mafft
@@ -350,37 +350,57 @@ Since we have removed one sequence, we decided to realign these files.
     done
     rm *mafft
 
+This is our **full dataset**.
+
 ## Avoiding LBA by removing _Notocelis gullmarensis_ from these alignments
+_Notocelis gullmarensis_ is a troublesome worm. This species has proven to be a problematic branch in the tree. Previous phylogenetic attempts (not shown) have recovered Notocelis in different positions of the tree, lowering the support of the nodes where it was positioned. This agrees with the only other study that has included this species, [Jondelius et al, 2011, Systematic Biology](https://academic.oup.com/sysbio/article/60/6/845/1676821).
+
+Here, we decided to infer a backbone tree for Acoelomorpha without this species and then used different topology tests to place it back in the tree. Hence, we need to create a new dataset without this species.
+
+    mkdir 16-Full_dataset_no_Notocelis
+    cp 15-Full_dataset/*fas 16-Full_dataset_no_Notocelis/
+
+    # Remove Notocelis
+    for i in 16-Full_dataset_no_Notocelis/*fas
+        do
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | grep -v 'Notocelis_gullmarensis' | tr ' ' '\n' > ${i}.tmp
+        mv ${i}.tmp ${i}
+    done
+
+Remove the alignments with fewer than five species
+
+    for i in 16-Full_dataset_no_Notocelis/*fas
+        do
+        seqs=$( grep -c '>' $i) 
+        if [ $seqs -lt 5 ]; then
+            rm $i
+        fi
+    done
+
+Re-align these sequences
+
+    for f in 16-Full_dataset_no_Notocelis/*fas
+        do
+        mafft-linsi $f > $f.mafft
+    done
+    rm 16-Full_dataset_no_Notocelis/*fas
+
+    # Remove unambiguously aligned positions
+    for i in 16-Full_dataset_no_Notocelis/*mafft
+        do
+        java -jar BMGE.jar -i $i -t AA -g 0.66:0.79 -of $i.fas > $i.log
+    done
+    rm 16-Full_dataset_no_Notocelis/*mafft
+
+    # Rename these files
+    for i in *fas
+        do
+        mv -- "$i" "${i%.fas.mafft.fas}.fas"
+    done
+
+This is our **full dataset without _Notocelis_**.
+
+## Filtering the data to ameliorate the effect of systematic bias
+AAA
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## This step has removed 1748 orthogroups, from 5569 to 3821, more than a 30% of the fasta files. We can perform the alignments now, but for
-## that we need to prepare two datasets: one with and one without Notocelis. The dataset with Notocelis will only include those orthogroups
-## where that species is present.
-
-
-
-
-
-
-
-
-
-
-
-
-## Later on, I will prepare to parallel datasets: with and without the species Notocelis gullmarensis. This species has proven to be a problematic branch in the tree. Previous phylogentic attempts (not shown) have recovered Notocelis in different positions of the tree, lowering the support of the nodes where it was positioned.
