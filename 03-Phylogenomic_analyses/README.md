@@ -166,16 +166,7 @@ With the phylogenetically informative matrix, we also tried MAST. [MAST](http://
     # All trees share the same GTR model, DNA frequencies and gamma model
     iqtree2 -s Phylogenetically_informative_genes.fas -m "LG+FO+G+TR" -te Alternative_topologies.PhylogeneticallyInformative.tres -nt AUTO
 
-ff
-
-
-    
-
-The first thing we did was to use the same analyses described above to see where traditional phylogenetic analyses would place _Notocelis_. Then, we tried two topology tests to see if one topology has more support than the others. We originally tried all possible topologies, with _Notocelis_ shooting off from all internal branches of the phylogeny, but only four were supported: sister to Convolutidae, Mecynostomidae, both, or Dakuidae.
-
-
-
-
+Unfortunately, neither the phylogenetic analyses nor the topology tests were conclusive. More than one topology received strong support, particularly the two where _Notocelis_ is sister to the Convolutidae+Mecynostomidae clade and the family Dakuidae. At this point, we decided to try to identify the main cause of topological instability in our data.
 
 ## Inferring the causes of topological discordance
 cc
