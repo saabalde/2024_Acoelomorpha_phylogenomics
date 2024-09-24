@@ -427,5 +427,6 @@ We created two datasets for each of these metrics, including the best (1) 300 an
     variables_sorted <- variables[order(variables[,'robinson_sim'], decreasing = T),]
 
 Up to this point, we have 11 different matrices. Ten of them (full dataset without _Notocelis_, and the 300 and 567-gene matrices for each of these metrics) were used to infer the backbone phylogeny of Acoelomorpha, while the last one (the full dataset including _Notocelis_) was used to place this species in the tree.
+All these matrices are shared in the next section "03-Phylogenomic_analyses", where they will be analysed.
 
 ---
