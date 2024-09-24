@@ -1,0 +1,8 @@
+#NEXUS
+begin sets;
+    taxset Notocelis = 20_023.Notocelis_gullmarensis;
+    taxset Convo_Mecy = P15761_125.Anaperus_rubellus P15761_141.Anaperus_tvaerminnensis SRR8617822.Neochildia_fusca SRR2681679.Convolutriloba_macropyga SRR5760179.Symsagittifera_roscoffensis DRR151142.Praesagittifera_naikaiensis SRR3105702.Childia_submaculatum P15761_110.Childia_vivipara 20_115.Childia_crassum 20_005.Paramecynostomum_diversicolor 20_082.Haploposthia_lactomaculata;
+    taxset Dakuiidae = 20_132.Philocelis_karlingi P15761_117.Philactinoposthia_rhammifera;
+    taxset Others = SRR8524599.Baltalimania_agile P15761_101.Baltalimania_occulta P15761_102.Praeconvoluta_tigrina SRR6374833.Aphanostoma_pulchra P15761_133.Praeaphanostoma_sp 20_063.Faerlea_glomerata 20_026.Haplogonaria_minima 20_093.Haploposthia_rubropunctata 20_073.Kuma_sp5;
+	taxset IGNORED = 19_228.Sterreria_sp 19_375.Solenofilomorpha_sp2 19_380.Solenofilomorpha_sp9 20_022.Nadina_sp2 20_078.Aphanostoma_virescens P15761_157.Diopistohoporus_sp1 P15761_173.Sterreria_rubra P15761_181.Sterreria_lundini SRR2500940.Xenoturbella_profunda SRR2681155.Meara_stichopi SRR2682004.Nemertoderma_westbladi SRR2682099.Sterreria_sp SRR2682154.Ascoparia_sp SRR3105703.Diopisthoporus_gymnopharyngeus SRR3105704.Diopisthoporus_longitubus SRR3105705.Eumecynostomum_macrobursalium SRR6375633.Paratomella_rubra SRR8454219.Hofstenia_miamia SRR8641368.Flagellophora_sp;
+end;
