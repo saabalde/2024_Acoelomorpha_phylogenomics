@@ -1,5 +1,5 @@
 ## Inferring a phylogenomic backbone for Acoelomorpha
-This analysis is based on the full dataset without _Notocelis_ and the corresponding subsampled matrices. We ran the same analyses over all matrices with two exceptions: (1) no site-specific models were used over the full dataset due to the size amount of memory required, and (2) we only ran PhyloBayes over a matrix including the 300 most complete genes (i.e. those with more species). This latter matrix is not included in the repository, but it can be easily created from the 367 occupancy dataset or using genesortR as before.
+This analysis is based on the full dataset without _Notocelis_ and the corresponding subsampled matrices. We ran the same analyses over all matrices with two exceptions: (1) no site-specific models were used over the full dataset due to the size amount of memory required, and (2) we only ran PhyloBayes only over the 300 most complete genes (i.e. those with more species).
 Here, the "Occupancy_300genes_Supermatrix.fas" supermatrix will be used as an example, but the same parameters were used for all datasets.
 
 The first analysis we ran was a coalescence tree with [ASTRAL-III](https://github.com/smirarab/ASTRAL). From this repository: "ASTRAL is a tool for estimating an unrooted species tree given a set of unrooted gene trees. ASTRAL is statistically consistent under the multi-species coalescent model (and thus is useful for handling incomplete lineage sorting, i.e., ILS)." Hoerver, the data provided is an already concatenated supermatrix. You can separate it into single genes using [this pipeline by Nathan Whelan](https://github.com/NathanWhelan/Split_supermatrix_into_partitions) after converting the matrix from fasta to phylip.
@@ -34,6 +34,45 @@ Besides this traditional ML tree, we also took advantage of the site-specific mo
     # Infer the tree under the C60 model
     cd ../; mkdir C60; cd C60
     iqtree -s Occupancy_300genes_Supermatrix.fas -m LG+C60+F+G -ft ../Occupancy_300genes_Supermatrix.fas.treefile -bb 1000 -nt AUTO -alrt 1000
+
+Finally, we also ran [PhyloBayes](https://github.com/bayesiancook/phylobayes) over the 300 most complete genes. This is also a site-specific model but in a Bayesian framework. PhyloBayes is computationally very expensive. All other submatrices did not return a meaningful result (we'll see it in a moment) and were not worth the trouble. We ran four independent chains.
+
+    # Run PhyloBayes
+    mpirun -np 16 pb_mpi -d Occupancy_300genes_Supermatrix.fas -s -cat -gtr -dgam 4 Acoelomorpha_300genes_chain1
+    mpirun -np 16 pb_mpi -d Occupancy_300genes_Supermatrix.fas -s -cat -gtr -dgam 4 Acoelomorpha_300genes_chain2
+    mpirun -np 16 pb_mpi -d Occupancy_300genes_Supermatrix.fas -s -cat -gtr -dgam 4 Acoelomorpha_300genes_chain3
+    mpirun -np 16 pb_mpi -d Occupancy_300genes_Supermatrix.fas -s -cat -gtr -dgam 4 Acoelomorpha_300genes_chain4
+    # -s:      save the detailed model configuration for each point visited during the run.
+    # -cat:    activates the Dirichlet process.
+    # -gtr:    specifies a general time reversible matrix.
+    # -dgam 4: specifies 4 categories for the discrete gamma distribution.
+
+    # Check the chains convergence
+    bpcomp -x 1000 10 Acoelomorpha_300genes_chain1 Acoelomorpha_300genes_chain2
+    tracecomp -x 1000 Acoelomorpha_300genes_chain1 Acoelomorpha_300genes_chain2
+
+    bpcomp -x 1000 10 Acoelomorpha_300genes_chain1 Acoelomorpha_300genes_chain3
+    tracecomp -x 1000 Acoelomorpha_300genes_chain1 Acoelomorpha_300genes_chain3
+
+    bpcomp -x 1000 10 Acoelomorpha_300genes_chain1 Acoelomorpha_300genes_chain4
+    tracecomp -x 1000 Acoelomorpha_300genes_chain1 Acoelomorpha_300genes_chain4
+
+    bpcomp -x 1000 10 Acoelomorpha_300genes_chain2 Acoelomorpha_300genes_chain3
+    tracecomp -x 1000 Acoelomorpha_300genes_chain2 Acoelomorpha_300genes_chain3
+    
+    bpcomp -x 1000 10 Acoelomorpha_300genes_chain2 Acoelomorpha_300genes_chain4
+    tracecomp -x 1000 Acoelomorpha_300genes_chain2 Acoelomorpha_300genes_chain4
+    
+    bpcomp -x 1000 10 Acoelomorpha_300genes_chain3 Acoelomorpha_300genes_chain4
+    tracecomp -x 1000 Acoelomorpha_300genes_chain3 Acoelomorpha_300genes_chain4
+
+aa
+
+
+    
+
+
+
 
 
 
