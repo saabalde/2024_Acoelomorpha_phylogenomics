@@ -169,7 +169,157 @@ With the phylogenetically informative matrix, we also tried MAST. [MAST](http://
 Unfortunately, neither the phylogenetic analyses nor the topology tests were conclusive. More than one topology received strong support, particularly the two where _Notocelis_ is sister to the Convolutidae+Mecynostomidae clade and the family Dakuidae. At this point, we decided to try to identify the main cause of topological instability in our data.
 
 ## Inferring the causes of topological discordance
-cc
+We considered two potential sources of topological instability: (1) [Hemiplasy](https://academic.oup.com/sysbio/article/57/3/503/1666092), i.e. " the topological discordance between a gene tree and a species tree attributable to lineage sorting", and (2) introgression. Incidentally, one of the reviewers suggested taxon-wise compositional heterogeneity might be an alternative explanation.
+
+To test for the presence of hemiplasy, we used the [R package pepo](https://github.com/guerreror/pepo), which calculates the Hemiplasy risk Factor ("the fraction of incongruence expected to be due to hemiplasy"). We used the ASTRAL tree inferred from the 567 most complete genes as input data. This analysis revealed a high HRF in all internal branches but the one leading to Convolutidae, but nothing specific to _Notocelis_ (**Figure 3a**).
+
+The result of the MAST test suggests there might be some introgression between _Notocelis_ and both Convolutidae and Mecynostomidae. According to the paper, similar support to minor topologies might suggest the presence of introgression. Yet, we had to test this possibility more carefully. Since we have two contrasting topologies, we used two methods based on the D-statistic to test for introgression. We first used the [Dfoil](https://github.com/jbpease/dfoil) algorithm to test introgression over a five-taxa symmetric phylogeny (the IQ-TREE tree). However, this analysis returned a lot of warnings related to data formatting and it was not conclusive. Then, we focused on the more traditional D-statistic calculated over a four-taxon topology (ASTRAL and PhyloBayes trees) using the [evobir R package](https://github.com/coleoguy/evobir).
+
+It makes no sense to work with genes that do not have at least one species of each of the target families, so we filtered these out:
+
+    mkdir Introgression
+    for i in *fas
+        do
+        Convolutidae=$( egrep -c 'DRR151142|P15761_125|P15761_141|SRR2681679|SRR8506641|SRR8617822' $i )
+        Mecynostomidae=$( egrep -c '20_005|20_115|P15761_110|SRR3105702' $i )
+        Dakuidae=$( egrep -c 'P15761_117|20_132' $i )
+        Notocelis=$( grep -c '20_023' $i )
+        if [ $Convolutidae -gt 0 ] || [ $Mecynostomidae -gt 0 ] || [ $Dakuidae -gt 0 ] || [ $Notocelis -gt 0 ] || [ $Outgroup -gt 0 ]; then
+            cp $i Introgression/
+        fi
+    done
+
+    cd Introgression
+
+To test for the presence of introgression, we tested all three species combinations for these families (one species per family) using the isodiametrid _Aphanostoma pulchra_ as an outgroup. This resulted in 75 different matrices.
+
+    # Create one directory for each combination where to store these genes
+    mkdir -p 07-Genes_New/{01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75}
+
+    # Go through the genes, find the four species of interest, and store them as a new file in the desired directory
+    for i in *fasta
+        do
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|P15761_125_Anaperus_rubellus|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 01/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|P15761_125_Anaperus_rubellus|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 02/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|P15761_125_Anaperus_rubellus|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 03/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|P15761_141_Anaperus_tvaerminnensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 04/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|P15761_141_Anaperus_tvaerminnensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 05/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|P15761_141_Anaperus_tvaerminnensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 06/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|SRR8617822_Neochildia_fusca|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 07/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|SRR8617822_Neochildia_fusca|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 08/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|SRR8617822_Neochildia_fusca|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 09/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|SRR2681679_Convolutriloba_macropyga|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 10/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|SRR2681679_Convolutriloba_macropyga|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 11/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|SRR2681679_Convolutriloba_macropyga|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 12/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|DRR151142_Praesagittifera_naikaiensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 13/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|DRR151142_Praesagittifera_naikaiensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 14/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'SRR3105702_Childia_submaculatum|DRR151142_Praesagittifera_naikaiensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 15/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|P15761_125_Anaperus_rubellus|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 16/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|P15761_125_Anaperus_rubellus|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 17/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|P15761_125_Anaperus_rubellus|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 18/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|P15761_141_Anaperus_tvaerminnensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 19/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|P15761_141_Anaperus_tvaerminnensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 20/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|P15761_141_Anaperus_tvaerminnensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 21/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|SRR8617822_Neochildia_fusca|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 22/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|SRR8617822_Neochildia_fusca|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 23/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|SRR8617822_Neochildia_fusca|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 24/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|SRR2681679_Convolutriloba_macropyga|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 25/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|SRR2681679_Convolutriloba_macropyga|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 26/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|SRR2681679_Convolutriloba_macropyga|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 27/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|DRR151142_Praesagittifera_naikaiensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 28/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|DRR151142_Praesagittifera_naikaiensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 29/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_115_Childia_crassum|DRR151142_Praesagittifera_naikaiensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 30/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|P15761_125_Anaperus_rubellus|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 31/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|P15761_125_Anaperus_rubellus|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 32/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|P15761_125_Anaperus_rubellus|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 33/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|P15761_141_Anaperus_tvaerminnensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 34/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|P15761_141_Anaperus_tvaerminnensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 35/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|P15761_141_Anaperus_tvaerminnensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 36/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|SRR8617822_Neochildia_fusca|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 37/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|SRR8617822_Neochildia_fusca|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 38/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|SRR8617822_Neochildia_fusca|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 39/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|SRR2681679_Convolutriloba_macropyga|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 40/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|SRR2681679_Convolutriloba_macropyga|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 41/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|SRR2681679_Convolutriloba_macropyga|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 42/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|DRR151142_Praesagittifera_naikaiensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 43/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|DRR151142_Praesagittifera_naikaiensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 44/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep 'P15761_110_Childia_vivipara|DRR151142_Praesagittifera_naikaiensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 45/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|P15761_125_Anaperus_rubellus|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 46/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|P15761_125_Anaperus_rubellus|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 47/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|P15761_125_Anaperus_rubellus|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 48/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|P15761_141_Anaperus_tvaerminnensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 49/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|P15761_141_Anaperus_tvaerminnensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 50/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|P15761_141_Anaperus_tvaerminnensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 51/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|SRR8617822_Neochildia_fusca|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 52/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|SRR8617822_Neochildia_fusca|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 53/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|SRR8617822_Neochildia_fusca|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 54/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|SRR2681679_Convolutriloba_macropyga|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 55/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|SRR2681679_Convolutriloba_macropyga|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 56/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|SRR2681679_Convolutriloba_macropyga|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 57/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|DRR151142_Praesagittifera_naikaiensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 58/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|DRR151142_Praesagittifera_naikaiensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 59/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_005_Paramecynostomum_diversicolor|DRR151142_Praesagittifera_naikaiensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra' | tr ' ' '\n' > 60/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|DRR151142_Praesagittifera_naikaiensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 61/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|DRR151142_Praesagittifera_naikaiensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 62/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|DRR151142_Praesagittifera_naikaiensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 63/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|P15761_125_Anaperus_rubellus|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 64/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|P15761_125_Anaperus_rubellus|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 65/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|P15761_125_Anaperus_rubellus|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 66/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|P15761_141_Anaperus_tvaerminnensis|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 67/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|P15761_141_Anaperus_tvaerminnensis|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 68/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|P15761_141_Anaperus_tvaerminnensis|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 69/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|SRR2681679_Convolutriloba_macropyga|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 70/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|SRR2681679_Convolutriloba_macropyga|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 71/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|SRR2681679_Convolutriloba_macropyga|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 72/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|SRR8617822_Neochildia_fusca|20_132_Philocelis_karlingi|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 73/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|SRR8617822_Neochildia_fusca|P15761_117_Philactinoposthia_rhammifera|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 74/${i}
+        tr '\n' ' ' < $i | sed 's/\ >/\,>/g' | tr ',' '\n' | egrep '20_082_Haploposthia_lactomaculata|SRR8617822_Neochildia_fusca|20_023_Notocelis_gullmarensis|SRR6374833_Aphanostoma_pulchra'  | tr ' ' '\n' > 75/${i}
+    done
+
+    # Remove all fasta files without, at least, four species
+    for i in */*fasta
+        do
+	    seqs=$( grep -c '>' ${i} )
+	    if [ $seqs -lt 4 ]; then
+	        rm ${i}
+	    fi
+    done
+
+    # Re-align all these files and create a supermatrix
+    for i in $( ls * | grep ':' | sed 's/\://g' )
+        do
+	    cd $i
+	    	
+	    for gene in *fasta
+	        do
+		    mafft-linsi ${gene} > ${gene}.fas
+		    rm $gene
+        done
+	
+        perl FASconCAT-G_v1.05.pl -l -s > FASconCat.log
+	    rm *fasta.fas
+        cp FcC_supermatrix.fas ../FcC_supermatrix.${i}.fas
+
+        cd ../	
+    done
+
+Now, with the D-statistic.R script, you can calculate the D-statistic for all these matrices.
+
+A lot of the analyses have returned signatures of introgression, mostly between Dakuidae and Mecynostomidae. To make sure this was not an artefact, we also tested different species throughout the tree (selected based on completeness), to see if they are also "hybridizing" with Mecynostomidae and Convolutidae. If so, then we should put these results on hold.
+The species selected were: _Eumecynostomum macrobursalium_ and _Aphanostoma virescens_ (“Nadinidae”, same outgroup), _A. pulchra_ and _Haploposthia rubropunctata_ (Isodiametridae, outgroup: _Diopisthoporus gymnopharyngeus_), and _D. gymnopharyngeus_ (Diopisthoporidae, outgroup: _Meara stichopi_). A total of 125 new supermatrices were created, following the same steps as above.
+
+We did find some signal of introgression in all these families, but the z-scores were generally higher when Dakuidae species were considered (i.e. the ABBA-BABA ratio deviates more from zero when Dakuidae is analysed). Besides, all families but Dakuidae present similar z-scores among them and no preference for either Mecynostomidae or Convolutidae (**Figure 3b**). If we consider the result of these families as a background signal, we still find some signal of introgression between Dakuidae and Mecynostomidae, which would explain the instability of these nodes among algorithms and the difficulty of placing _Notocelis_ in the tree.
+
+
+![image]()
+**Figure 3:** Chronogram inferred with MCMCtree, based on three secondary calibrations (highlighted with a black arrowhead) and the 50 most complete genes. The split of each family is marked with a circle, following the same colour scheme from Figs. 1 and 2. The white and grey bars correspond to geological periods. The 95% credible interval of each node shows the full distribution of age estimates.
+
+
+
+
+
+
+
 
 ## Inferring divergence times
 We used MCMCtree, included in the program [PAML](http://abacus.gene.ucl.ac.uk/software/paml.html), to infer the divergence times among Acoelomorpha lineages. However, before going into details it is important to explain to decisions that might affect the final result. First, we chose the phylogeny inferred by IQ-TREE, with _Notocelis_ as sister to Dakuidae, as our working hypothesis. Despite some topological problems still remaining, this is the best-supported topology and it generally agrees with the literature. Second, due to the absence of fossils from this group, we relied on secondary calibrations to date our tree.
