@@ -292,8 +292,8 @@ To clean this sample, we ran a [Clan test](https://github.com/ChrisCreevey/clan_
     cp 13-Symmetry_tests/*fas 14-Clan_test/
     cd 14-Clan_test
     
-    # Create a "Clans.txt" analysis defining _Faerlea_ as part of Proporidae
-    20_026.Haplogonaria_minima 20_063.Faerlea_glomerata 20_073.Kuma_sp5 20_082.Haploposthia_lactomaculata 20_093.Haploposthia_rubropunctata
+    # Create a "Clans.txt" analysis defining _Faerlea_ as part of Proporidae:
+    # 20_026.Haplogonaria_minima 20_063.Faerlea_glomerata 20_073.Kuma_sp5 20_082.Haploposthia_lactomaculata 20_093.Haploposthia_rubropunctata
 
     # Infer a gene tree for each of the alignments
     for i in *fas
