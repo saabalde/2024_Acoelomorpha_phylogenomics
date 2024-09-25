@@ -253,9 +253,9 @@ The new "in.BV" file contains the Hessian matrix for each gene calculated with t
     # Using empirical data
     mcmctree MCMC_step3_controlfile.ctl 2>&1 | tee log_MCMCtree_posterior.txt
 
-Run these analyses twice, with different seeds, to asses convergence. I used the MCMCtreeR package to do that and plot the tree.
+Run these analyses twice, with different seeds, to asses convergence. I used the [MCMCtreeR package](https://github.com/PuttickMacroevolution/MCMCtreeR) to do that and plot the tree.
 
-![image](https://github.com/saabalde/2024_Acoelomorpha_phylogenomics/blob/main/03-Phylogenomic_analyses/01-Figure1_IQTREE_rate_567genes.png)
+![image](https://github.com/saabalde/2024_Acoelomorpha_phylogenomics/blob/main/03-Phylogenomic_analyses/04-Figure4_Acoelomorpha_chronogram.png)
 **Figure 4:** Chronogram inferred with MCMCtree, based on three secondary calibrations (highlighted with a black arrowhead) and the 50 most complete genes. The split of each family is marked with a circle, following the same colour scheme from Figs. 1 and 2. The white and grey bars correspond to geological periods. The 95% credible interval of each node shows the full distribution of age estimates.
 
 
