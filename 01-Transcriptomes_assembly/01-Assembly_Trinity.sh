@@ -1,6 +1,6 @@
 #!/bin/bash -l
  
-#SBATCH -A snic2020-15-191
+#SBATCH -A XX
 #SBATCH -C mem256GB
 #SBATCH -p core
 #SBATCH -n 20
