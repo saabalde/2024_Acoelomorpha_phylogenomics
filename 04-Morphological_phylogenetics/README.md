@@ -24,7 +24,7 @@ This analysis identified the partition created by PartitionFinder as the best-fi
 
 Unfortunately, none of these efforts resulted in a well-supported tree. Very few nodes were correctly inferred and all partitions returned the same topology, suggesting that morphological data is misleading.
 
-![image]()
+![image](https://github.com/saabalde/2024_Acoelomorpha_phylogenomics/blob/main/04-Morphological_phylogenetics/Supplementary_Figure%20S6-Morphological_phylogeny.png)
 **Supp. Figure S6:** Phylogenetic tree inferred from morphological data using MrBayes. Branch are colour-coded as Figure 1 in the manuscript. Nodal support represents posterior probabilities and the scale bar substitutions per site.
 
 
