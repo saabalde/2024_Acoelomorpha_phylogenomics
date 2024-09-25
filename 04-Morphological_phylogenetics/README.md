@@ -28,8 +28,16 @@ Unfortunately, none of these efforts resulted in a well-supported tree. Very few
 **Supp. Figure S6:** Phylogenetic tree inferred from morphological data using MrBayes. Branch are colour-coded as Figure 1 in the manuscript. Nodal support represents posterior probabilities and the scale bar substitutions per site.
 
 ## Phylogenetic placement
+Due to the poor phylogenetic performance of the morphological matrix and given the importance of morphology in acoelomorph classification and taxonomy, we tested an alternative approach. Since we already have a robust phylogeny inferred from transcriptomic data, we wanted to test if we could get better results using phylogenetic placement algorithms. We chose for this the algorithm implemented in [RAxML](https://github.com/amkozlov/raxml-ng).
 
+The RAxML manual suggests to use a ["weighted approach"](https://ieeexplore.ieee.org/document/5586939). Basically it means you first weight the morphological characters, according to their congruence with the reference phylogeny, and then you incorporate those weights into the phylogenetic placement approach. This approach is supposed to improve the accuracy of this analysis by 20% to 25%.
 
+    # Infer the weights of the characters
+    raxmlHPC -f u -m ASC_MULTIGAMMA --asc-corr=lewis -t Reference_tree.tre -s Characters.phy -n test -# 1000 -p 12345
 
+    # Use these weights over a new matrix
+    raxmlHPC -f v -m ASC_MULTIGAMMA --asc-corr=lewis -t Reference_tree.tre -s All_species.phy -a RAxML_weights.test -n Morphological_placement -# 1000 -p 12345
 
+This approach correctly identified the position (at least to the family level) of 60 out of 83 species (>72%), demonstrating its potential for inferring the classification of new acoelomorph species. A careful evaluation of the results revealed that missing data in the matrix is the main factor leading to species misplacement.
 
+---
