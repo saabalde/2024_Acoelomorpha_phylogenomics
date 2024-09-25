@@ -12,7 +12,7 @@ The recovered (molecular) topology is mostly congruent with previous studies, bu
 ## Repository description
 This repository is intended to offer enough details to replicate our study, explaining the reasoning behind some of our decisions. Ideally, the level of detail should be enough to be accessible for people with a low background in phylogenomics, and so we hope it can also be used as a reference in future, similar studies.
 
-we have devided the code in four sections (01-Transcriptomes_assembly, 02-Orthology_search_and_filtering, 03-Phylogenomic_analyses, and 04-Morphological_phylogenetics= to make it easier to digest. Scripts and the data necessary to run the analyses are provided alongside the explanations.
+We have devided the code in four sections (01-Transcriptomes_assembly, 02-Orthology_search_and_filtering, 03-Phylogenomic_analyses, and 04-Morphological_phylogenetics) to make it easier to digest. Scripts and the data necessary to run the analyses are provided alongside the explanations.
 
 ### Data accessibility:
 <ul>
