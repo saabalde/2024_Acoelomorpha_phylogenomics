@@ -1,12 +1,12 @@
 #!/bin/bash -l
  
-#SBATCH -A snic2020-15-191
+#SBATCH -A xx
 #SBATCH -p core
 #SBATCH -n 8
 #SBATCH -t 5-00:00:00
-#SBATCH -J rcorrector
-#SBATCH -o job_rcorrector_%j.out
-#SBATCH -e job_rcorrector_%j.err
+#SBATCH -J FullPolish
+#SBATCH -o job_fullpolish_%j.out
+#SBATCH -e job_fullpolish_%j.err
 
 
 ## Load modules
