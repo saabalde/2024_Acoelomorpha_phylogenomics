@@ -174,6 +174,89 @@ cc
 ## Inferring divergence times
 We used MCMCtree, included in the program [PAML](http://abacus.gene.ucl.ac.uk/software/paml.html), to infer the divergence times among Acoelomorpha lineages. However, before going into details it is important to explain to decisions that might affect the final result. First, we chose the phylogeny inferred by IQ-TREE, with _Notocelis_ as sister to Dakuidae, as our working hypothesis. Despite some topological problems still remaining, this is the best-supported topology and it generally agrees with the literature. Second, due to the absence of fossils from this group, we relied on secondary calibrations to date our tree.
 
+This is a two-step analysis: first, we inferred a timetree for Bilateria, including three acoelomorph genomes, to obtain the calibration points. Second, we used these estimates to date cladogenetic events in Acoelomorpha.
+
+### 1. Bilateria
+This tree was inferred from 18 genomes downloaded from GenBank. The list of species and accession numbers is provided in **Supp. Table S2**, but can also be seen in the file "MCMCtree_Metazoan_genomes_and_calibrations.xlsx". This list includes two Acoela (*Praesagittifera naikaiensis*, *Symsagittifera roscoffensis*) and one Nemrtodermatida (*Nemertoderma westbladi*). The tree topology (see **Supp. Figure S1** in the paper) and calibrations (**Supp. Table S3**, also provided in the attached file) were based on the literature.
+Importantly, the position of Xenacoelomorpha in the metazoan tree remains largely disputed. They are either the sister group of all other bilaterians (Nephrozoa hypothesis) or the sister of Ambulacraria (Xenambulacraria hypothesis). Because the selected topology might affect the inferred divergence times, we calculated both.
+
+We provide a step-by-step description of the analysis in the next section (the acoelomorph tree), but the analyses are the same: from the annotated proteomes, infer orthogroups. Pick 50 randomly from those that include all species. Infer a quick tree to estimate the prior for the beta parameter (rgene_gamma = 2 825 1). Run MCMCtree.
+
+### 2. Acoelomorpha
+We obtained three calibration points from the previous analysis:
+| Calibration | Node | Time range (My) | Description |
+|:---:| --- |:---:| --- |
+| 1 | Root | 540 - 635 | The upper limit is set to the maximum age of animals |
+| 2 | Acoela - Nemertodermatida | 500 - 575 | The split between the two groups could be inferred thanks to the inclusion of *Nemertoderma* in the other tree |
+| 3 | *P. naikaiensis* - *S. roscoffensis* | 175 - 200 | The two acoel species in the bilaterian chronogram |
+
+The analysis is based on the 50 most complete genes analysed as independent partitions. We followed [this tutorial](http://abacus.gene.ucl.ac.uk/software/MCMCtree.Tutorials.pdf) to run MCMCtree on protein data.
+
+First, convert the alignments to phylip and concatenate them into a single file. The result should be the "MCMCtree_Supermatrix.phy" file. For the conversion, you can use [this script](https://github.com/josephhughes/Sequence-manipulation/blob/master/Fasta2Phylip.pl) by [Joseph Hughes](https://github.com/josephhughes).
+
+    # Convert fasta to phylip
+    for i in $( ls *fas | sed 's/\.fas//g' )
+        do
+        Fasta2Phylip.pl $i.fas $i.phy
+    done
+
+    # Change the separation between the species name in the sequence to five spaces (I did this in a text editor)
+    # Change the dots in the species names
+    for i in OG*
+        do
+        sed -i 's/\./\_/g' $i
+    done
+
+    # Concatenate the alignments
+    for i in *phy
+        do
+        cat $i >> Supermatrix.phy; echo "" >> Supermatrix.phy
+    done
+
+Infer a quick tree to calculate the prior of the substitution rate.
+
+    # Concatenate the alignments
+    perl FASconCAT-G_v1.05.pl -l -s > FASconCat.log
+    rm OG*.fas
+
+    # Run IQ-TREE
+    iqtree -s FcC_supermatrix.fas -spp FcC_supermatrix_partition.txt -m MFP -nt AUTO -bb 1000 -alrt 1000
+
+To calculate the branch length, calculate the average of the two longest branches (0.83335). With an alpha = 2 and assuming they diverged 635 million years ago, the beta of the rate is: 2 * 635 / 0.83335 = 1523.96952061 (ca. 1524). This line in the control file becomes: rgene_gamma = 2 1524 1"
+
+Using the input and control files provided, estimate the Hessian and the Gradient.
+
+    mcmctree MCMC_step1_controlfile.ctl
+
+This will create the Hessian and the Gradient for the analysis. However, the model is the simple Poisson with no gamma rates. We need to modify these files.
+
+    # First delete the "out.BV" and "rst" files.
+    rm out.BV rst*
+
+    # Second, modify the "*.tmp" files to read the model parameters from the "wag.dat" file; "model = 2" (empirical rates); add three new lines
+    # with the model parameters.
+    sed -i '/aaRatefile/ s/=/=\ wag.dat/g' *tmp*ctl
+    sed -i '/model/ s/0/2/g' *tmp*ctl | head
+    sed -ie '/wag.dat/a fix_alpha\ =\ 0\nalpha\ =\ \.5\nncatG\ =\ 4' tmp*.ctl       # After the line that contains "wag.dat", append three lines
+
+    # Run codeml to recalculate the Hessian matrix and append the Hessian of each gene to the "in.BV" file.
+    for i in tmp*ctl
+        do
+        codeml ${i}; cat rst2 >> in.BV; echo "" >> in.BV
+    done
+
+The new "in.BV" file contains the Hessian matrix for each gene calculated with the WAG+GAMMA model. Now we are ready to calculate the divergence times sampling from the priors (usedata = 0) and using empirical data (usedata = 2).
+
+    # Sampling from the prior
+    mcmctree MCMC_step2_priorsampling_controlfile.ctl 2>&1 | tee log_MCMCtree_prior.txt
+
+    # Using empirical data
+    mcmctree MCMC_step3_controlfile.ctl 2>&1 | tee log_MCMCtree_posterior.txt
+
+Run these analyses twice, with different seeds, to asses convergence. I used the MCMCtreeR package to do that and plot the tree.
+
+![image](https://github.com/saabalde/2024_Acoelomorpha_phylogenomics/blob/main/03-Phylogenomic_analyses/01-Figure1_IQTREE_rate_567genes.png)
+**Figure 4:** Chronogram inferred with MCMCtree, based on three secondary calibrations (highlighted with a black arrowhead) and the 50 most complete genes. The split of each family is marked with a circle, following the same colour scheme from Figs. 1 and 2. The white and grey bars correspond to geological periods. The 95% credible interval of each node shows the full distribution of age estimates.
 
 
 ---
