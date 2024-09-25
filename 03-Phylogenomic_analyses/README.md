@@ -311,15 +311,10 @@ The species selected were: _Eumecynostomum macrobursalium_ and _Aphanostoma vire
 We did find some signal of introgression in all these families, but the z-scores were generally higher when Dakuidae species were considered (i.e. the ABBA-BABA ratio deviates more from zero when Dakuidae is analysed). Besides, all families but Dakuidae present similar z-scores among them and no preference for either Mecynostomidae or Convolutidae (**Figure 3b**). If we consider the result of these families as a background signal, we still find some signal of introgression between Dakuidae and Mecynostomidae, which would explain the instability of these nodes among algorithms and the difficulty of placing _Notocelis_ in the tree.
 
 
-![image]()
-**Figure 3:** Chronogram inferred with MCMCtree, based on three secondary calibrations (highlighted with a black arrowhead) and the 50 most complete genes. The split of each family is marked with a circle, following the same colour scheme from Figs. 1 and 2. The white and grey bars correspond to geological periods. The 95% credible interval of each node shows the full distribution of age estimates.
+![image](https://github.com/saabalde/2024_Acoelomorpha_phylogenomics/blob/main/03-Phylogenomic_analyses/03-Figure3_HRF_and_Introgression_summary.png)
+**Figure 3:** (a) Hemiplasy Risk Factor calculated for all internal branches of the tree, based on the ASTRAL tree inferred from the 567 most complete genes and a 0.001 mutation rate. In the inset, a photo of the species _Notocelis gullmarensis_. (b) Comparison of the z-score calculated from all the analysed submatrices separated per family. The inset to the right shows the results for the three species of the family Dakuidae. The dashed lines mark the significance threshold in the z-score (z-score = 3).
 
-
-
-
-
-
-
+**Addendum**: one of the reviewers suggested we test the possibility of taxon-specific compositional heterogeneity as an alternative explanation. We used [BaCoCa](https://bonn.leibniz-lib.de/en/research/research-centres-and-groups/bacoca-v11r) to measure the per-taxon amino acid distribution and calculate the RCFV for each species in our tree. We can confidently say this factor is not a main contributor to the difficulty of inferring the position of Notocelis in the tree. Its RCFV (0.0012) is lower than the average of Acoela (0.0016), while the species with higher-than-average RCFV are not the protagonists of topological discordances.
 
 ## Inferring divergence times
 We used MCMCtree, included in the program [PAML](http://abacus.gene.ucl.ac.uk/software/paml.html), to infer the divergence times among Acoelomorpha lineages. However, before going into details it is important to explain to decisions that might affect the final result. First, we chose the phylogeny inferred by IQ-TREE, with _Notocelis_ as sister to Dakuidae, as our working hypothesis. Despite some topological problems still remaining, this is the best-supported topology and it generally agrees with the literature. Second, due to the absence of fossils from this group, we relied on secondary calibrations to date our tree.
