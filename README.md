@@ -19,8 +19,7 @@ We have devided the code in four sections (01-Transcriptomes_assembly, 02-Orthol
     <li><strong>Raw reads:</strong> All transcriptomes can be downloaded from the <a href="https://www.ncbi.nlm.nih.gov/sra/?term=xenacoelomorpha">NCBI SRA</a>. The new transcriptomes are part of the <a href="https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1106782">Bioproject PRJNA1106782</a>.
 
   </li>
-    <li><strong>Other data:</strong> We have created a <a href="https://datadryad.org/stash/share/-j295xDx5ENV04DAmF_IDdEvbUuE24jbi6t_Ug9FmNs
-">Dryad repository</a>, which contains: (1) transcriptome assemblies, (2) the TransDecoder output, (3) all alignments, (4) gene trees, (5) the morphological matrix, and (6) the nexus files necessary to replicate the morphological phylogenetic analyses.
+    <li><strong>Other data:</strong> We have created a <a href="https://datadryad.org/">Dryad repository</a>, which contains: (1) transcriptome assemblies, (2) the TransDecoder output, (3) all alignments, (4) gene trees, (5) the morphological matrix, and (6) the nexus files necessary to replicate the morphological phylogenetic analyses.
     <li><strong>This repository</strong> has also been made accessible through <a href="https://doi.org/10.5281/zenodo.13845748">Zenodo</a>.</li>
 </ul>
 
