@@ -25,7 +25,7 @@ We have devided the code in four sections (01-Transcriptomes_assembly, 02-Orthol
 
 ## Citation
 <ul>
-  <li>Abalde, S., and Jondelius, U. (accepted, pending minor revisions). A Phylogenomic Backbone for Acoelomorpha Inferred from Transcriptomic Data. <a href="">Systematic Biology</a>.</li>
+  <li>Abalde, S., and Jondelius, U. (in press). A Phylogenomic Backbone for Acoelomorpha Inferred from Transcriptomic Data. <a href="">Systematic Biology</a>.</li>
 </ul>
 
 ---
